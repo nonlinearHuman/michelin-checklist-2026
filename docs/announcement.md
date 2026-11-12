@@ -83,9 +83,10 @@
 
 三种方式，从轻到重：
 
-1. **直接打开**：下载 `index.html`，浏览器打开就能用。iPhone 可以「添加到主屏幕」，和 App 没区别。
-2. **托管到 GitHub Pages**：Fork 仓库，开 Pages，得到一个自己的网址，手机电脑都能开（记录仍在各自浏览器本地）。
-3. **自己改**：数据在 `data/michelin-guide-2026.json`，页面由 `script/build.js` 生成。想换配色、加字段、甚至换成黑珍珠或亚洲 50 最佳榜单，改完 `node script/build.js` 重新生成即可。
+1. **直接在线用**：<https://nonlinearhuman.github.io/michelin-checklist-2026/>，手机电脑打开就能打卡，不用下载。
+2. **下载离线版**：`index.html` 保存到本地，浏览器打开。iPhone 可以「添加到主屏幕」，和 App 没区别。
+3. **托管到自己的 GitHub Pages**：Fork 仓库，开 Pages，得到一个自己的网址，手机电脑都能开（记录仍在各自浏览器本地）。
+4. **自己改**：数据在 `data/michelin-guide-2026.json`，页面由 `script/build.js` 生成。想换配色、加字段、甚至换成黑珍珠或亚洲 50 最佳榜单，改完 `node script/build.js` 重新生成即可。
 
 ---
 

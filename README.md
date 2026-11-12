@@ -2,6 +2,8 @@
 
 **1137 家米其林餐厅，压缩成一份能打卡的清单。** 星级 / 必比登 / 入选一目了然，标记「想去 / 吃过 / 值得二访」，进度自动统计。单文件、免登录、数据只在你自己手里。
 
+👉 **在线体验：<https://nonlinearhuman.github.io/michelin-checklist-2026/>**
+
 <p align="center">
   <img src="docs/screenshot-mobile.png" alt="手机端：按城市浏览、三态打卡" width="330">
   <img src="docs/screenshot-desktop.png" alt="桌面端：星级餐厅与打卡状态" width="560">
