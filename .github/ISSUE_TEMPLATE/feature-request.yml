@@ -1,0 +1,38 @@
+name: 功能建议
+description: 说说你希望它多做什么，或者哪里用着别扭
+title: "[建议] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        特别想听真实使用场景：你在什么情况下打开它、卡在哪一步、希望它替你做掉什么。
+        「用起来哪里不顺手」和「想加什么功能」一样重要。
+  - type: textarea
+    id: scene
+    attributes:
+      label: 使用场景
+      description: 你通常在什么时候用它？想解决什么问题？
+      placeholder: 出差到一座新城市，想快速筛出还没吃过的星级餐厅…
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: 期望的做法
+      placeholder: 希望能按「距上次打卡时间」排序，或者导出成图片分享…
+    validations:
+      required: true
+  - type: dropdown
+    id: scope
+    attributes:
+      label: 这个建议更偏向
+      options:
+        - 打卡记录与统计
+        - 筛选、搜索、排序
+        - 数据准确性
+        - 分享 / 导出
+        - 界面与手机体验
+        - 其他
+    validations:
+      required: true

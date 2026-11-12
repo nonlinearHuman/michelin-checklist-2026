@@ -5,6 +5,12 @@
 <meta name="color-scheme" content="light">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>全国米其林指南 2026 · 打卡清单</title>
+<meta name="description" content="全国米其林指南 2026 打卡清单：1137 家餐厅，星级 / 必比登 / 入选一目了然，支持「想去 / 吃过 / 值得二访」三态标记，纯本地存储，免注册、无需登录。">
+<meta name="theme-color" content="#26211A">
+<meta property="og:title" content="全国米其林指南 2026 · 打卡清单">
+<meta property="og:description" content="1137 家米其林餐厅，按城市和评级整理成一份能打卡的清单。记录只存在你自己的浏览器里。">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%2326211A'/%3E%3Ctext x='50' y='73' font-size='64' text-anchor='middle' fill='%23D8C08A'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E">
 <style>
   :root{
     --bg:#F8F6F1; --card:#FFFFFF; --ink:#221D17; --sub:#8C8577;
@@ -64,6 +70,10 @@
   footer .f-btn:active{background:var(--line);}
   footer .f-reset{flex:0 0 auto;color:var(--red);background:none;border:1px solid transparent;padding:9px 4px;}
   @media (max-width:420px){footer .f-tip{display:none;}}
+  @media (max-width:480px){
+    .btns{flex-direction:column;gap:5px;}
+    .btns a{padding:6px 10px;font-size:11px;text-align:center;min-width:46px;}
+  }
   .f-tip{font-size:11px;color:var(--sub);line-height:1.5;flex:none;width:158px;}
   .empty{text-align:center;color:var(--sub);font-size:13px;padding:40px 0;}
 </style>
@@ -76,7 +86,7 @@
   <div class="progress-text" id="ptext">吃过 0 / 1137 家</div>
 </header>
 <div id="stick">
-  <div class="searchbox"><input type="search" id="q" placeholder="搜索餐厅名 / 菜系 / 地址…"></div>
+  <div class="searchbox"><input type="search" id="q" placeholder="搜索餐厅名 / 菜系 / 城市…"></div>
   <nav id="nav">
     <button data-f="all" class="active">全部 1137</button>
     <button data-f="star">星级 257</button>
@@ -106,6 +116,10 @@ const LSKEY='michelin-lit-v2';
 let filter='all', city='all', q='';
 let litData={};
 try{litData=JSON.parse(localStorage.getItem(LSKEY)||'{}')||{};}catch(e){litData={};}
+// 兜底：若旧键为空，回退到三态键里的 lit，避免历史记录因单键丢失而清零
+if(!Object.keys(litData).length){
+  try{const s3=JSON.parse(localStorage.getItem('michelin-state-v3')||'null');if(s3&&s3.lit&&Object.keys(s3.lit).length)litData=s3.lit;}catch(e){}
+}
 // ===== 打卡键：同名不同城用「城市｜名称」区分；兼容旧的名称键 =====
 const KSEP='｜';
 const NAME_CNT={};DATA.forEach(d=>NAME_CNT[d.n]=(NAME_CNT[d.n]||0)+1);
@@ -130,7 +144,6 @@ try{localStorage.setItem(LSKEY,JSON.stringify(litData));}catch(e){}
 const lit=new Set(Object.keys(litData));
 function saveLit(){localStorage.setItem(LSKEY,JSON.stringify(litData));}
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function escJs(s){return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function rankLabel(r){return r==='bib'?'必比登':r==='sel'?'入选':(r+'星');}
 function rankColor(r){return r==='bib'?'#5F7D62':r==='sel'?'#55677E':(+r===3?'#8E2A25':+r===2?'#B0713B':'#A98035');}
 function rankOrder(r){return r==='bib'?3:r==='sel'?4:3-(+r);}
@@ -244,15 +257,15 @@ function ensureXLSX(){
 // 备份：导出规范命名的 Excel（列：餐厅名称/城市/评级/吃过日期/菜系）
 document.getElementById('backup').addEventListener('click',()=>ensureXLSX().then(()=>{
   const RN=r=>r==='bib'?'必比登':r==='sel'?'入选':(+r===3?'三星':+r===2?'二星':'一星');
-  const rows=[['餐厅名称','城市','评级','吃过日期','菜系','地址']];
+  const rows=[['餐厅名称','城市','评级','吃过日期','菜系']];
   Object.entries(litData)
     .sort((a,b)=>String(b[1]||'').localeCompare(String(a[1]||'')))
     .forEach(([n,dt])=>{
       const d=DATA.find(x=>keyOf(x)===n)||{};
-      rows.push([nameOfKey(n),cityOfKey(n)||d.c||'',RN(d.r)||'',dt||'',d.t||'',d.a||'']);
+      rows.push([nameOfKey(n),cityOfKey(n)||d.c||'',RN(d.r)||'',dt||'',d.t||'']);
     });
   const ws=XLSX.utils.aoa_to_sheet(rows);
-  ws['!cols']=[{wch:28},{wch:10},{wch:8},{wch:12},{wch:14},{wch:44}];
+  ws['!cols']=[{wch:28},{wch:10},{wch:8},{wch:12},{wch:14}];
   const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,'打卡记录');
   const t=new Date();
@@ -330,8 +343,8 @@ var css=document.createElement('style');
 css.textContent=''
 +'.mini2{font-size:10px;padding:2px 7px;border-radius:10px;margin-left:6px;white-space:nowrap;vertical-align:2px}'
 +'.mini2.w{background:#FFF1EA;color:#C23B2E}.mini2.a{background:#EAF3EC;color:#39644A}'
-+'.tri2{display:flex;gap:5px;margin-top:8px}'
-+'.tri2 button{font-size:11px;padding:5px 9px;border-radius:14px;border:1px solid #E9E3D7;background:#fff;color:#6B6357;cursor:pointer;font-weight:600}'
++'.tri2{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap}'
++'.tri2 button{font-size:11px;padding:5px 9px;border-radius:14px;border:1px solid #E9E3D7;background:#fff;color:#6B6357;cursor:pointer;font-weight:600;white-space:nowrap;line-height:1.3}'
 +'.tri2 button.on{background:#2B2118;color:#FFF8EC;border-color:#2B2118}'
 +'.tri2 button.w.on{background:#E2483C;border-color:#E2483C;color:#fff}'
 +'.tri2 button.a.on{background:#F5C542;border-color:#F5C542;color:#2B2118}'
@@ -399,7 +412,10 @@ visibleList=function(){
 };
 var _render=render;
 render=function(){_render();refreshNav();
-  note.textContent='✦ 吃过 '+lit.size+' 家 · 其中 ◎ 值得二访 '+AS.size+' · ○ 想去 '+WS.size+' · 已拔草 '+Object.keys(PD).length;
+  var none=lit.size===0&&WS.size===0&&AS.size===0&&Object.keys(PD).length===0;
+  note.textContent=none
+    ? '点卡片上的 ○ 想去 收藏心愿、✦ 吃过 盖章打卡 · 记录只保存在这台设备的浏览器里'
+    : '✦ 吃过 '+lit.size+' 家 · 其中 ◎ 值得二访 '+AS.size+' · ○ 想去 '+WS.size+' · 已拔草 '+Object.keys(PD).length;
 };
 
 window.setWish=function(k){

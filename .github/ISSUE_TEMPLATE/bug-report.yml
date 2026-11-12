@@ -1,0 +1,39 @@
+name: 使用问题
+description: 页面打不开、记录丢失、备份恢复异常等
+title: "[问题] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        提 Issue 前可以先确认两件事：
+        1. 记录存在浏览器本地，**清浏览器数据、换浏览器、用无痕模式都会看不到之前的记录**；
+        2. 备份 / 恢复需要联网加载 Excel 组件，离线时会提示加载失败。
+  - type: textarea
+    id: what
+    attributes:
+      label: 发生了什么
+      placeholder: 点了「备份」没有下载文件，控制台提示…
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      placeholder: 1. 手机上打开 index.html 2. 点「✦ 吃过」 3. 刷新页面后记录消失
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: 设备与浏览器
+      placeholder: iPhone 15 / Safari 18；或 Windows 11 / Chrome 131
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: 使用方式
+      placeholder: 本地打开 index.html / GitHub Pages 地址
+    validations:
+      required: false

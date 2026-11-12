@@ -1,0 +1,52 @@
+name: 餐厅数据纠错
+description: 报告评级错误、名称错误、缺漏或已闭店的餐厅
+title: "[数据] "
+labels: ["data"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢帮忙校正数据！米其林榜单每年更新，一家一家核对难免有错漏。
+        请尽量附上可查证的来源（米其林官网页面、官方新闻稿等），方便核对后尽快修正。
+  - type: input
+    id: city
+    attributes:
+      label: 城市
+      placeholder: 例如：上海
+    validations:
+      required: true
+  - type: input
+    id: restaurant
+    attributes:
+      label: 餐厅名称
+      placeholder: 例如：Ultraviolet by Paul Pairet
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: 问题类型
+      options:
+        - 评级错误（星级 / 必比登 / 入选）
+        - 餐厅名称错误
+        - 菜系描述错误
+        - 榜单中缺漏该餐厅
+        - 餐厅已闭店 / 已摘星
+        - 其他
+    validations:
+      required: true
+  - type: textarea
+    id: detail
+    attributes:
+      label: 正确信息
+      description: 当前显示什么、应该是什么
+      placeholder: 当前显示「一星」，2026 版应为「二星」
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: 来源链接（可选）
+      placeholder: https://guide.michelin.com/...
+    validations:
+      required: false

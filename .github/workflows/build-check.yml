@@ -1,0 +1,32 @@
+name: build-check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: 重新构建并校验产物一致
+        run: |
+          node script/build.js
+          git diff --exit-code -- index.html
+      - name: 数据基本校验
+        run: |
+          node -e "
+          const d = require('./data/michelin-guide-2026.json');
+          const ok = ['1','2','3','bib','sel'];
+          if (!Array.isArray(d) || !d.length) throw new Error('数据为空');
+          const bad = d.filter(x => !x.c || !x.n || !ok.includes(String(x.r)));
+          if (bad.length) throw new Error('存在非法记录: ' + JSON.stringify(bad.slice(0,3)));
+          const dup = new Set(), dupList = [];
+          d.forEach(x => { const k = x.c + '|' + x.n; if (dup.has(k)) dupList.push(k); dup.add(k); });
+          if (dupList.length) throw new Error('存在重复记录: ' + dupList.slice(0,3).join(', '));
+          console.log('数据校验通过，共 ' + d.length + ' 家');
+          "
