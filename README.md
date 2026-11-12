@@ -74,11 +74,9 @@ node script/build.js   # 从 data/michelin-guide-2026.json 重新生成 index.ht
 
 这个项目最需要两样东西：**数据纠错**和**真实使用反馈**。
 
-- 🐛 [餐厅信息有误 / 缺漏 / 已闭店](https://github.com/OWNER/michelin-checklist-2026/issues/new?template=data-correction.yml) —— 请说明城市、餐厅名与正确信息，附来源更好
-- 💡 [功能建议](https://github.com/OWNER/michelin-checklist-2026/issues/new?template=feature-request.yml) —— 你希望它多做什么，或哪里用着别扭
-- 🆘 [使用问题](https://github.com/OWNER/michelin-checklist-2026/issues/new?template=bug-report.yml) —— 设备、浏览器、复现步骤
-
-> 把 `OWNER` 替换成你的 GitHub 用户名（Fork 后建议一并替换 README 里的链接）。
+- 🐛 [餐厅信息有误 / 缺漏 / 已闭店](https://github.com/nonlinearHuman/michelin-checklist-2026/issues/new?template=data-correction.yml) —— 请说明城市、餐厅名与正确信息，附来源更好
+- 💡 [功能建议](https://github.com/nonlinearHuman/michelin-checklist-2026/issues/new?template=feature-request.yml) —— 你希望它多做什么，或哪里用着别扭
+- 🆘 [使用问题](https://github.com/nonlinearHuman/michelin-checklist-2026/issues/new?template=bug-report.yml) —— 设备、浏览器、复现步骤
 
 ## 许可
 
