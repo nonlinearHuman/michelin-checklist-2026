@@ -112,11 +112,26 @@ const html = `<!DOCTYPE html>
   }
   .f-tip{font-size:11px;color:var(--sub);line-height:1.5;flex:none;width:158px;}
   .empty{text-align:center;color:var(--sub);font-size:13px;padding:40px 0;}
+  .sharebtn{position:absolute;top:20px;right:14px;font-size:12px;color:#D8C08A;border:1px solid rgba(216,192,138,.45);border-radius:3px;padding:7px 11px;background:rgba(216,192,138,.1);letter-spacing:.04em;cursor:pointer;font-family:inherit;transition:background .2s ease;}
+  .sharebtn:active{background:rgba(216,192,138,.24);}
+  #pmodal{display:none;position:fixed;inset:0;z-index:2000;background:rgba(24,16,8,.78);overflow-y:auto;padding:18px 12px;}
+  #pmodal.open{display:flex;flex-direction:column;align-items:center;}
+  #pinner{background:#fff;border-radius:8px;padding:12px 12px 14px;max-width:min(94vw,460px);box-shadow:0 24px 70px rgba(0,0,0,.35);}
+  .phead{display:flex;justify-content:space-between;align-items:center;padding:2px 4px 10px;font-family:Georgia,"Songti SC","STSong",serif;font-weight:700;font-size:15px;color:#2B2118;}
+  #pclose{cursor:pointer;color:#999;font-size:20px;line-height:1;padding:2px 6px;}
+  #pimgwrap{text-align:center;}
+  #pimgwrap img{max-width:100%;max-height:62vh;border-radius:4px;box-shadow:0 4px 16px rgba(34,29,23,.14);}
+  .pfoot{display:flex;justify-content:space-between;align-items:center;padding-top:10px;gap:10px;flex-wrap:wrap;}
+  .phint{font-size:11.5px;color:#A08A50;line-height:1.5;}
+  #pdl,#pdlall{background:var(--gold);color:#FBF7EC;border:none;border-radius:3px;padding:9px 16px;font-size:13px;font-weight:600;letter-spacing:.04em;cursor:pointer;white-space:nowrap;}
+  #toast{position:fixed;left:50%;bottom:32px;transform:translateX(-50%) translateY(20px);z-index:3000;background:#2B2118;color:#FFF8EC;padding:12px 22px;border-radius:24px;font-size:13px;font-weight:600;box-shadow:0 8px 28px rgba(43,33,24,.3);opacity:0;pointer-events:none;transition:opacity .25s ease,transform .25s ease;max-width:88vw;text-align:center;}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 </style>
 </head>
 <body>
 <header>
   <h1>全国米其林指南 2026</h1>
+  <button class="sharebtn" id="posterbtn">✦ 战绩海报</button>
   <p>${counts.total} 家餐厅 · ${cities.length} 座城市 · 星级 ${counts.star} / 必比登 ${counts.bib} / 入选 ${counts.sel}<br>✦ 吃过 = 点亮；吃过之中 ◎ 标记值得二访；○ 想去 = 还没吃。打卡记录只保存在你的浏览器本地，不上传任何服务器</p>
   <div class="progress-wrap"><div class="progress-bar" id="bar"></div></div>
   <div class="progress-text" id="ptext">吃过 0 / ${counts.total} 家</div>
@@ -141,6 +156,13 @@ const html = `<!DOCTYPE html>
   <button class="f-reset" id="reset">清空打卡记录</button>
   <div class="f-tip">记录仅保存在本机浏览器；换设备或清除浏览器数据前，先「备份」导出 Excel，再到新设备「恢复」导入。</div>
 </footer>
+<div id="pmodal">
+  <div id="pinner">
+    <div class="phead"><span>我的米其林战绩 · 分享海报</span><span id="pclose">✕</span></div>
+    <div id="pimgwrap"></div>
+    <div class="pfoot"><span class="phint">手机长按图片保存到相册<br>两张 1080×1440（3:4），适合小红书 / 朋友圈</span><button id="pdl">下载本张</button></div>
+  </div>
+</div>
 <script>
 const DATA=${JSON.stringify(items)};
 const CITIES=${JSON.stringify(cities)};
@@ -276,18 +298,24 @@ document.getElementById('reset').addEventListener('click',()=>{
     lit.clear();litData={};saveLit();render();
   }
 });
-// Excel 库按需加载：点备份/恢复才拉取 xlsx.full.min.js（SheetJS 官方 CDN），页面本体保持轻量（手机秒开）
+// Excel 库按需加载：点备份/恢复才加载 xlsx.full.min.js（本地 vendor 优先，完全离线可用；
+// 若把 index.html 单独拷走导致 vendor 缺失，才回落到官方 CDN）。页面本体保持轻量（手机秒开）
 let _xlsxP=null;
+function loadScriptOnce(src){
+  return new Promise((res,rej)=>{
+    const s=document.createElement('script');
+    s.src=src;
+    s.onload=()=>res();
+    s.onerror=()=>{s.remove();rej(new Error('load failed: '+src));};
+    document.head.appendChild(s);
+  });
+}
 function ensureXLSX(){
   if(typeof XLSX!=='undefined')return Promise.resolve();
   if(_xlsxP)return _xlsxP;
-  _xlsxP=new Promise((res,rej)=>{
-    const s=document.createElement('script');
-    s.src='https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js';
-    s.onload=()=>res();
-    s.onerror=()=>{_xlsxP=null;rej(new Error('load failed'));};
-    document.head.appendChild(s);
-  });
+  _xlsxP=loadScriptOnce('vendor/xlsx.full.min.js')
+    .catch(()=>loadScriptOnce('https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js'))
+    .catch(e=>{_xlsxP=null;throw e;});
   return _xlsxP;
 }
 // 备份：导出规范命名的 Excel（列：餐厅名称/城市/评级/吃过日期/菜系）
@@ -490,6 +518,248 @@ if(resetBtn)resetBtn.onclick=function(){
   lit.clear();litData={};WS.clear();WD={};AS.clear();AD={};PD={};
   saveState();render();
 };
+
+/* ===== 战绩海报 · 对外分享 =====
+   只呈现「吃过」与「值得二访」两类事实及其派生数据；
+   心愿、惦记、拔草、进度自谦、界面说明一律不进海报。
+   两张 1080×1440（3:4），固定网格：页眉 / 主角区 / 内容区 / 收尾区 / 页脚。 */
+var PW=1080,PH=1440,SAFE=88;
+var PAPER='#FFF8EC',INK='#2B2118',INK2='#7A6A56',RED='#EF3B2C',TEAL='#4E8B72',LINE='#EADCC2';
+var FS='"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif';
+var GX=SAFE,GW=PW-2*SAFE,GR=PW-SAFE;
+var HERO_TOP=190,BODY_TOP=640,BODY_BOT=1150,END_TOP=1190,FOOT_LINE=1326;
+var PAGE_TOTAL=2;
+
+function newPage(){
+  var c=document.createElement('canvas');c.width=PW;c.height=PH;var x=c.getContext('2d');
+  x.fillStyle=PAPER;x.fillRect(0,0,PW,PH);
+  x.strokeStyle='rgba(122,106,86,.05)';x.lineWidth=1;
+  for(var yy=BODY_TOP+16;yy<BODY_BOT;yy+=34){x.beginPath();x.moveTo(GX,yy);x.lineTo(GR,yy);x.stroke();}
+  return {c:c,x:x};
+}
+function rr2(x,a,b,w,h,r){x.beginPath();x.moveTo(a+r,b);x.arcTo(a+w,b,a+w,b+h,r);x.arcTo(a+w,b+h,a,b+h,r);x.arcTo(a,b+h,a,b,r);x.arcTo(a,b,a+w,b,r);x.closePath();}
+function cut(x,s,maxW){if(x.measureText(s).width<=maxW)return s;while(s.length>1&&x.measureText(s+'…').width>maxW)s=s.slice(0,-1);return s+'…';}
+function wrapText(x,s,maxW){var out=[],cur='';for(var i=0;i<s.length;i++){var t=cur+s[i];if(x.measureText(t).width>maxW&&cur){out.push(cur);cur=s[i];}else cur=t;}if(cur)out.push(cur);return out;}
+function head(x,tag){
+  x.fillStyle=RED;rr2(x,GX,SAFE-30,58,58,10);x.fill();
+  x.fillStyle='#fff';x.textAlign='center';x.font='800 32px '+FS;x.fillText('米',GX+29,SAFE+12);x.textAlign='left';
+  x.fillStyle=INK;x.font='800 30px '+FS;x.fillText(tag,GX+76,SAFE+11);
+  x.textAlign='right';x.fillStyle=INK2;x.font='600 17px '+FS;x.fillText('中国内地及港澳 · 2026',GR,SAFE+9);x.textAlign='left';
+  x.strokeStyle=LINE;x.lineWidth=2;x.beginPath();x.moveTo(GX,SAFE+56);x.lineTo(GR,SAFE+56);x.stroke();
+}
+function foot(x,n){
+  x.strokeStyle=LINE;x.lineWidth=2;x.beginPath();x.moveTo(GX,FOOT_LINE);x.lineTo(GR,FOOT_LINE);x.stroke();
+  x.fillStyle=INK2;x.font='600 16px '+FS;x.textAlign='left';x.fillText('米其林指南 2026 · 中国内地及港澳',GX,FOOT_LINE+34);
+  x.textAlign='right';x.fillStyle=RED;x.font='800 18px '+FS;x.fillText('0'+n+' / 0'+PAGE_TOTAL,GR,FOOT_LINE+34);x.textAlign='left';
+}
+/* 主角区：淡朱红光斑 + 巨型数字 + 一笔手绘圈 + 收据撕票边 */
+function scribble(x,cx,cy,rx,ry,col){
+  x.save();x.translate(cx,cy);x.rotate(-0.13);
+  x.strokeStyle=col;x.lineWidth=5;x.lineCap='round';x.lineJoin='round';
+  x.beginPath();
+  x.moveTo(rx*0.86,-ry*0.54);
+  x.bezierCurveTo(rx*0.30,-ry*1.26,-rx*0.98,-ry*1.08,-rx*1.04,-ry*0.14);
+  x.bezierCurveTo(-rx*1.18,ry*0.64,-rx*0.70,ry*1.22,-rx*0.10,ry*1.05);
+  x.bezierCurveTo(rx*0.60,ry*1.18,rx*1.16,ry*0.68,rx*1.01,ry*0.08);
+  x.bezierCurveTo(rx*0.98,-ry*0.18,rx*0.92,-ry*0.50,rx*0.76,-ry*0.68);
+  x.stroke();x.restore();
+}
+function tearEdge(x,y){
+  x.beginPath();x.moveTo(GX,y);
+  for(var px=GX;px<GR-16;px+=16){x.lineTo(px+8,y+8);x.lineTo(px+16,y);}
+  x.strokeStyle='#E6D5B8';x.lineWidth=2;x.stroke();
+  x.strokeStyle=RED;x.lineWidth=6;x.lineCap='round';x.beginPath();x.moveTo(GX,y);x.lineTo(GX+112,y);x.stroke();
+}
+function hero(x,lead,line1,line2,num){
+  var nBase=HERO_TOP+330,right=GR-64,nStr=String(num);
+  x.textAlign='right';x.font='800 232px '+FS;
+  var nw=x.measureText(nStr).width,ncx=right-nw/2,ncy=nBase-84;
+  var rad=Math.max(nw/2+52,132);
+  var g=x.createRadialGradient(ncx,ncy,8,ncx,ncy,rad);
+  g.addColorStop(0,'rgba(239,59,44,.14)');g.addColorStop(1,'rgba(239,59,44,0)');
+  x.fillStyle=g;x.beginPath();x.arc(ncx,ncy,rad,0,Math.PI*2);x.fill();
+  x.textAlign='left';
+  var y=HERO_TOP+56;
+  if(lead){x.fillStyle=INK2;x.font='700 34px '+FS;x.fillText(lead,GX,y);y+=112;}
+  x.fillStyle=INK;x.font='800 84px '+FS;x.fillText(line1,GX,y);
+  y+=104;x.fillStyle=INK;x.font='800 84px '+FS;x.fillText(line2,GX,y);
+  x.textAlign='right';x.font='800 232px '+FS;x.fillStyle=RED;x.fillText(nStr,right,nBase);x.textAlign='left';
+  scribble(x,ncx,ncy,nw/2+34,116,RED);
+  tearEdge(x,HERO_TOP+394);
+}
+function ending(x,txt){
+  x.fillStyle=INK;x.font='600 31px '+FS;
+  wrapText(x,txt,GW).forEach(function(s2,i){x.fillText(s2,GX,END_TOP+22+i*46);});
+}
+function sectionLabel(x,txt,right,y){
+  x.fillStyle=INK;x.font='800 28px '+FS;x.fillText(txt,GX+30,y);
+  if(right){x.textAlign='right';x.fillStyle=INK2;x.font='600 19px '+FS;x.fillText(right,GR-30,y);x.textAlign='left';}
+}
+function card(x,y,h){
+  x.fillStyle='#fff';x.strokeStyle=LINE;x.lineWidth=2;rr2(x,GX,y,GW,h,16);x.fill();x.stroke();
+}
+function thinLine(x,y){
+  x.strokeStyle=LINE;x.lineWidth=1.5;x.beginPath();x.moveTo(GX+30,y);x.lineTo(GR-30,y);x.stroke();
+}
+
+function buildPosterSet(){
+  PAGE_TOTAL=2;
+  var litArr=DATA.filter(function(d){return lit.has(keyOf(d));});
+  var total=DATA.length;
+  var starTotal=DATA.filter(function(d){return typeof d.r==='number';}).length;
+  var starLit=litArr.filter(function(d){return typeof d.r==='number';}).length;
+  var guideStarPct=Math.round(starTotal/total*1000)/10;
+  var myStarPct=litArr.length?Math.round(starLit/litArr.length*1000)/10:0;
+  var cityCnt={},cuiCnt={},rankCnt={'三星':0,'二星':0,'一星':0,'必比登':0,'入选':0};
+  litArr.forEach(function(d){
+    cityCnt[d.c]=(cityCnt[d.c]||0)+1;
+    var cu=(d.t||'其他').replace(/·绿星/g,'').replace(/·/g,' / ')||'其他';cuiCnt[cu]=(cuiCnt[cu]||0)+1;
+    var rk=typeof d.r==='number'?(['','一星','二星','三星'][d.r]||'一星'):(d.r==='bib'?'必比登':'入选');
+    rankCnt[rk]=(rankCnt[rk]||0)+1;
+  });
+  var cityN=Object.keys(cityCnt).length;
+  var cities=Object.entries(cityCnt).sort(function(a,b){return b[1]-a[1];});
+  var cuis=Object.entries(cuiCnt).sort(function(a,b){return b[1]-a[1];}).slice(0,3);
+  var cY=BODY_TOP+18,cH=BODY_BOT-BODY_TOP-36;
+  var pages=[];
+
+  /* ---- P1 战绩：吃过多少、都是什么级别 ---- */
+  var p1=newPage(),x=p1.x;head(x,'吃过的');
+  hero(x,'2026 米其林指南 · '+total+' 家',litArr.length?'也没吃':'还没开始',litArr.length?'几家':'第一顿',litArr.length);
+  card(x,cY,cH);
+  sectionLabel(x,'吃过的是什么级别','星级 '+starLit+' 家',cY+52);
+  thinLine(x,cY+74);
+  var ranks=['三星','二星','一星','必比登','入选'].filter(function(r){return rankCnt[r]>0;});
+  if(ranks.length){
+    var maxRank=Math.max.apply(null,ranks.map(function(r){return rankCnt[r];}).concat([1]));
+    var rowTop=cY+96,rowH=(cH-120)/ranks.length,barX=GX+172,barW=GW-172-124;
+    ranks.forEach(function(r,i){
+      var yy=rowTop+rowH*(i+0.5);
+      if(i){x.strokeStyle='#F2E9D8';x.lineWidth=1.5;x.beginPath();x.moveTo(GX+30,yy-rowH/2+4);x.lineTo(GR-30,yy-rowH/2+4);x.stroke();}
+      x.fillStyle=INK;x.font='700 26px '+FS;x.fillText(r,GX+30,yy+9);
+      x.fillStyle='#F2E9D8';rr2(x,barX,yy-9,barW,18,9);x.fill();
+      x.fillStyle=(['三星','二星','一星'].indexOf(r)>=0?RED:'#D8B24A');rr2(x,barX,yy-9,Math.max(18,barW*rankCnt[r]/maxRank),18,9);x.fill();
+      x.textAlign='right';x.fillStyle=INK;x.font='800 30px '+FS;x.fillText(rankCnt[r]+' 家',GR-30,yy+10);x.textAlign='left';
+    });
+  }else{
+    x.fillStyle=INK2;x.font='500 26px '+FS;x.textAlign='center';
+    x.fillText('名单还空着，先从第一顿开始。',GX+GW/2,cY+cH/2);x.textAlign='left';
+  }
+  ending(x,litArr.length?'也没特意挑，吃着吃着就这些了。':'名单还空着，先从第一顿开始。');
+  foot(x,1);pages.push(p1.c.toDataURL('image/png'));
+
+  /* ---- P2 履历：走过哪些城、眼光准不准 ---- */
+  var p2=newPage();x=p2.x;head(x,'走过的地方');
+  hero(x,litArr.length?'':'还没出门',litArr.length?'顺便':'等第一座',litArr.length?'走了几座城':'城市',cityN);
+  card(x,BODY_TOP+10,200);
+  sectionLabel(x,'星级占比','对比全指南',BODY_TOP+50);
+  var half=GW/2;
+  x.strokeStyle=LINE;x.lineWidth=1.5;x.beginPath();x.moveTo(GX+half,BODY_TOP+76);x.lineTo(GX+half,BODY_TOP+192);x.stroke();
+  [[guideStarPct,'全指南',INK2],[myStarPct,'我吃过的',RED]].forEach(function(o,i){
+    var cx=GX+half*i+30;
+    x.fillStyle=o[2];x.font='800 68px '+FS;x.fillText(o[0]+'%',cx,BODY_TOP+146);
+    x.fillStyle=INK2;x.font='600 20px '+FS;x.fillText(o[1],cx,BODY_TOP+182);
+  });
+  var labY=BODY_TOP+252,colW=(GW-40)/2,colX=[GX,GX+colW+40],barW2=colW-90;
+  x.fillStyle=INK;x.font='800 27px '+FS;x.fillText('走过这些城',colX[0],labY);x.fillText('偏爱的口味',colX[1],labY);
+  var tc=cities.slice(0,4),tg=cuis;
+  [tc,tg].forEach(function(arr,i){
+    var px=colX[i];
+    if(!arr.length){x.fillStyle=INK2;x.font='500 21px '+FS;x.fillText('还没有记录',px,labY+62);return;}
+    arr.forEach(function(p,j){
+      var yy=labY+56+j*56;
+      x.fillStyle=i?TEAL:RED;x.font='700 24px '+FS;x.fillText(cut(x,p[0],colW-96),px,yy);
+      x.textAlign='right';x.fillStyle=INK2;x.font='600 19px '+FS;x.fillText(p[1]+' 家',px+colW,yy);x.textAlign='left';
+      x.fillStyle='#EFE4CF';rr2(x,px,yy+12,barW2,9,5);x.fill();
+      x.fillStyle=i?TEAL:RED;rr2(x,px,yy+12,Math.max(8,barW2*p[1]/Math.max(1,arr[0][1])),9,5);x.fill();
+    });
+  });
+  ending(x,litArr.length?'没什么目标，走到哪吃到哪。':'名单还空着，先从第一顿开始。');
+  foot(x,2);pages.push(p2.c.toDataURL('image/png'));
+  return pages;
+}
+
+/* ---- 海报弹窗：翻页 / 下载 ---- */
+window.buildPosterSet=buildPosterSet;
+var posterImgs=[],posterIdx=0;
+var toastEl=document.createElement('div');toastEl.id='toast';document.body.appendChild(toastEl);
+var toastT=null;
+function toast(msg){toastEl.textContent=msg;toastEl.classList.add('show');clearTimeout(toastT);toastT=setTimeout(function(){toastEl.classList.remove('show');},2600);}
+function closePoster(){
+  document.getElementById('pmodal').classList.remove('open');
+  document.body.style.overflow='';
+}
+document.getElementById('posterbtn').onclick=function(){
+  if(!lit.size){toast('先打卡几家，再来生成战绩海报');return;}
+  try{posterImgs=buildPosterSet();}catch(e){alert('海报生成失败：'+e.message);return;}
+  posterIdx=0;
+  document.getElementById('pmodal').classList.add('open');
+  document.body.style.overflow='hidden';
+  showPage();
+};
+document.getElementById('pclose').onclick=closePoster;
+document.getElementById('pmodal').addEventListener('click',function(e){if(e.target.id==='pmodal')closePoster();});
+function dlPage(i){
+  var a=document.createElement('a');a.href=posterImgs[i];
+  a.download='米其林战绩-'+(i+1)+'-'+today()+'.png';a.click();
+}
+function navPage(d){
+  if(posterImgs.length<2)return;
+  posterIdx=(posterIdx+d+posterImgs.length)%posterImgs.length;showPage();
+}
+function showPage(){
+  var wrapEl=document.getElementById('pimgwrap');
+  wrapEl.innerHTML='';
+  var im=document.createElement('img');
+  im.id='pimg';im.src=posterImgs[posterIdx];im.alt='米其林战绩 第'+(posterIdx+1)+'张';
+  im.style.cssText='display:block;margin:0 auto';
+  wrapEl.appendChild(im);
+  var sx=null;
+  im.addEventListener('touchstart',function(e){sx=e.touches[0].clientX;},{passive:true});
+  im.addEventListener('touchend',function(e){
+    if(sx===null)return;var dx=e.changedTouches[0].clientX-sx;sx=null;
+    if(dx<-40)navPage(1);else if(dx>40)navPage(-1);
+  });
+  im.addEventListener('click',function(){navPage(1);});
+  if(posterImgs.length>1){
+    var navRow=document.createElement('div');
+    navRow.style.cssText='display:flex;align-items:center;justify-content:center;gap:16px;margin:12px 0 2px';
+    var mk=function(txt,d){
+      var b=document.createElement('button');b.textContent=txt;
+      b.style.cssText='padding:6px 18px;font-size:16px;line-height:1;border:1px solid #E9E3D7;background:#fff;border-radius:3px;cursor:pointer;color:#6B6357';
+      b.onclick=function(){navPage(d);};return b;
+    };
+    navRow.appendChild(mk('‹',-1));
+    var ind=document.createElement('span');
+    ind.style.cssText='font-size:13px;font-weight:600;color:#7A6A56;letter-spacing:.1em;min-width:44px;text-align:center';
+    ind.textContent=(posterIdx+1)+' / '+posterImgs.length;
+    navRow.appendChild(ind);
+    navRow.appendChild(mk('›',1));
+    wrapEl.appendChild(navRow);
+  }
+  var hint=document.createElement('div');
+  hint.style.cssText='font-size:11.5px;color:#7A6A56;margin-top:6px;line-height:1.6;text-align:center';
+  hint.textContent=posterImgs.length>1
+    ? '左右滑动或点箭头翻页 · '+posterImgs.length+' 张 1080×1440（3:4）适合小红书轮播'
+    : '1080×1440（3:4），适合小红书首图';
+  wrapEl.appendChild(hint);
+  var pdl=document.getElementById('pdl');
+  pdl.textContent='下载本张';
+  pdl.onclick=function(){dlPage(posterIdx);};
+  var pdlAll=document.getElementById('pdlall');
+  if(posterImgs.length>1){
+    if(!pdlAll){pdlAll=document.createElement('button');pdlAll.id='pdlall';pdl.parentNode.appendChild(pdlAll);}
+    pdlAll.textContent='下载全部';
+    pdlAll.onclick=function(){posterImgs.forEach(function(_,i){setTimeout(function(){dlPage(i);},i*400);});};
+  }else if(pdlAll){pdlAll.remove();}
+}
+document.addEventListener('keydown',function(e){
+  var m=document.getElementById('pmodal');
+  if(!m||!m.classList.contains('open'))return;
+  if(e.key==='ArrowRight')navPage(1);
+  else if(e.key==='ArrowLeft')navPage(-1);
+  else if(e.key==='Escape')closePoster();
+});
 
 render();
 })();
