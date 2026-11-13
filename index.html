@@ -85,6 +85,10 @@
   }
   .f-tip{font-size:11px;color:var(--sub);line-height:1.5;flex:none;width:158px;}
   .empty{text-align:center;color:var(--sub);font-size:13px;padding:40px 0;}
+  #fbline{max-width:768px;margin:0 auto;padding:14px 16px calc(26px + env(safe-area-inset-bottom));text-align:center;font-size:12px;color:var(--sub);line-height:1.7;}
+  #fbline a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line);padding-bottom:1px;}
+  #fbline a:active{color:var(--ink2);}
+  #fbline .fb-sep{margin:0 8px;color:var(--line);}
   .sharebtn{position:absolute;top:20px;right:14px;font-size:12px;color:#D8C08A;border:1px solid rgba(216,192,138,.45);border-radius:3px;padding:7px 11px;background:rgba(216,192,138,.1);letter-spacing:.04em;cursor:pointer;font-family:inherit;transition:background .2s ease;}
   .sharebtn:active{background:rgba(216,192,138,.24);}
   #pmodal{display:none;position:fixed;inset:0;z-index:2000;background:rgba(24,16,8,.78);overflow-y:auto;padding:18px 12px;}
@@ -129,6 +133,12 @@
   <button class="f-reset" id="reset">清空打卡记录</button>
   <div class="f-tip">记录仅保存在本机浏览器；换设备或清除浏览器数据前，先「备份」导出 Excel，再到新设备「恢复」导入。</div>
 </footer>
+<div id="fbline">
+  <span>发现数据错误或有想法？</span>
+  <a href="https://docs.qq.com/form/page/DVEdqUm53VU5sRGxz" target="_blank" rel="noopener noreferrer">告诉我 →</a>
+  <span class="fb-sep">·</span>
+  <a href="https://github.com/nonlinearHuman/michelin-checklist-2026" target="_blank" rel="noopener noreferrer">源码</a>
+</div>
 <div id="pmodal">
   <div id="pinner">
     <div class="phead"><span>我的米其林战绩 · 分享海报</span><span id="pclose">✕</span></div>

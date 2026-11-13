@@ -6,6 +6,9 @@ const fs = require('fs');
 const path = require('path');
 const DATA = require('../data/michelin-guide-2026.json');
 
+// 反馈入口：腾讯文档收集表（填表者无需登录 GitHub）。换成自己的表单用户，只改这一行。
+const FEEDBACK_URL = 'https://docs.qq.com/form/page/DVEdqUm53VU5sRGxz';
+
 // ---- 城市元数据 ----
 const AMAP_CITY = { "北京":"110000","上海":"310000","广州":"440100","深圳":"440300","成都":"510100","杭州":"330100","南京":"320100","苏州":"320500","天津":"120000","扬州":"321000","常州":"320400","台州":"331000","温州":"330300","福州":"350100","厦门":"350200","泉州":"350500","宁德":"350900","香港":"810000","澳门":"820000" };
 const DP_CITY = { "北京":"2","上海":"1","广州":"4","深圳":"7","成都":"8","杭州":"3","南京":"5","苏州":"6","天津":"10","扬州":"12","福州":"14","厦门":"15" };
@@ -121,6 +124,10 @@ const html = `<!DOCTYPE html>
   }
   .f-tip{font-size:11px;color:var(--sub);line-height:1.5;flex:none;width:158px;}
   .empty{text-align:center;color:var(--sub);font-size:13px;padding:40px 0;}
+  #fbline{max-width:768px;margin:0 auto;padding:14px 16px calc(26px + env(safe-area-inset-bottom));text-align:center;font-size:12px;color:var(--sub);line-height:1.7;}
+  #fbline a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--line);padding-bottom:1px;}
+  #fbline a:active{color:var(--ink2);}
+  #fbline .fb-sep{margin:0 8px;color:var(--line);}
   .sharebtn{position:absolute;top:20px;right:14px;font-size:12px;color:#D8C08A;border:1px solid rgba(216,192,138,.45);border-radius:3px;padding:7px 11px;background:rgba(216,192,138,.1);letter-spacing:.04em;cursor:pointer;font-family:inherit;transition:background .2s ease;}
   .sharebtn:active{background:rgba(216,192,138,.24);}
   #pmodal{display:none;position:fixed;inset:0;z-index:2000;background:rgba(24,16,8,.78);overflow-y:auto;padding:18px 12px;}
@@ -165,6 +172,12 @@ const html = `<!DOCTYPE html>
   <button class="f-reset" id="reset">清空打卡记录</button>
   <div class="f-tip">记录仅保存在本机浏览器；换设备或清除浏览器数据前，先「备份」导出 Excel，再到新设备「恢复」导入。</div>
 </footer>
+<div id="fbline">
+  <span>发现数据错误或有想法？</span>
+  <a href="${FEEDBACK_URL}" target="_blank" rel="noopener noreferrer">告诉我 →</a>
+  <span class="fb-sep">·</span>
+  <a href="https://github.com/nonlinearHuman/michelin-checklist-2026" target="_blank" rel="noopener noreferrer">源码</a>
+</div>
 <div id="pmodal">
   <div id="pinner">
     <div class="phead"><span>我的米其林战绩 · 分享海报</span><span id="pclose">✕</span></div>
