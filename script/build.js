@@ -46,6 +46,15 @@ const html = `<!DOCTYPE html>
 <meta property="og:title" content="全国米其林指南 2026 · 打卡清单">
 <meta property="og:description" content="1137 家米其林餐厅，按城市和评级整理成一份能打卡的清单。记录只存在你自己的浏览器里。">
 <meta property="og:type" content="website">
+<!-- 分享卡：换成自己的域名后再改这几行的绝对地址 -->
+<meta property="og:url" content="https://nonlinearhuman.github.io/michelin-checklist-2026/">
+<meta property="og:site_name" content="米其林指南 2026 打卡清单">
+<meta property="og:image" content="https://nonlinearhuman.github.io/michelin-checklist-2026/docs/og-card.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="1137 家米其林，你吃过几家？">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://nonlinearhuman.github.io/michelin-checklist-2026/docs/og-card.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%2326211A'/%3E%3Ctext x='50' y='73' font-size='64' text-anchor='middle' fill='%23D8C08A'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E">
 <style>
   :root{
@@ -551,6 +560,10 @@ function foot(x,n){
   x.strokeStyle=LINE;x.lineWidth=2;x.beginPath();x.moveTo(GX,FOOT_LINE);x.lineTo(GR,FOOT_LINE);x.stroke();
   x.fillStyle=INK2;x.font='600 16px '+FS;x.textAlign='left';x.fillText('米其林指南 2026 · 中国内地及港澳',GX,FOOT_LINE+34);
   x.textAlign='right';x.fillStyle=RED;x.font='800 18px '+FS;x.fillText('0'+n+' / 0'+PAGE_TOTAL,GR,FOOT_LINE+34);x.textAlign='left';
+  // 回流小字：图被转发出去时，看的人能找到工具本身（不想带就把这两行删掉）
+  x.fillStyle='rgba(122,106,86,.7)';x.font='600 15px '+FS;
+  x.fillText('github.com/nonlinearHuman/michelin-checklist-2026',GX,FOOT_LINE+62);
+  x.textAlign='right';x.fillText('非官方整理 · 免费使用',GR,FOOT_LINE+62);x.textAlign='left';
 }
 /* 主角区：淡朱红光斑 + 巨型数字 + 一笔手绘圈 + 收据撕票边 */
 function scribble(x,cx,cy,rx,ry,col){

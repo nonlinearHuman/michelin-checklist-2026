@@ -1,5 +1,9 @@
 # 全国米其林指南 2026 · 打卡清单
 
+<p align="center">
+  <img src="docs/og-card.png" alt="1137 家米其林，你吃过几家？" width="760">
+</p>
+
 **1137 家米其林餐厅，压缩成一份能打卡的清单。** 星级 / 必比登 / 入选一目了然，标记「想去 / 吃过 / 值得二访」，进度自动统计。单文件、免登录、数据只在你自己手里。
 
 👉 **在线体验：<https://nonlinearhuman.github.io/michelin-checklist-2026/>**
