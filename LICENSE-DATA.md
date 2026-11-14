@@ -13,4 +13,4 @@
 3. 数据可能不完整、有错误或随指南更新而过时，使用风险自负。
 4. 若你是权利方并认为本仓库的数据整理方式侵犯了你的权益，请提 Issue，会尽快处理。
 
-本声明之外的代码部分适用 MIT License（见 LICENSE）。
+本声明之外的代码部分适用 PolyForm Noncommercial License 1.0.0（见 LICENSE），禁止商业使用。

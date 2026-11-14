@@ -106,9 +106,15 @@ node script/build.js   # 重新生成 index.html 与 manifest.webmanifest
 
 ## 许可
 
-- **代码**（`index.html`、`script/`）：[MIT](./LICENSE)
-- **数据**（`data/`）：见 [LICENSE-DATA](./LICENSE-DATA.md)，整理自米其林指南公开信息，不适用 MIT
+**不可商用。** 自己用、学着改、分享给朋友都欢迎；拿去卖、做成产品、塞进付费服务，不行。
+
+- **代码**（`index.html`、`script/`）：[PolyForm Noncommercial 1.0.0](./LICENSE) —— 允许个人研究、学习、爱好项目，允许修改与再分享；**禁止任何商业目的使用**
+- **数据**（`data/`）：见 [LICENSE-DATA](./LICENSE-DATA.md)，整理自米其林指南公开信息，本项目不主张其版权
 - **第三方组件**：`vendor/xlsx.full.min.js` 为 [SheetJS](https://sheetjs.com) 0.20.3（Apache-2.0，许可全文见 [vendor/LICENSE.sheetjs.txt](./vendor/LICENSE.sheetjs.txt)，声明见 [vendor/NOTICE.md](./vendor/NOTICE.md)）
+
+**想商用？** 把这个清单、代码或数据集用进商业场景（产品、SaaS、内部工具、培训物料、内容付费），可以单独谈。走[反馈收集表](https://docs.qq.com/form/page/DVEdqUm53VU5sRGxz)说明用途即可，不用先付钱。
+
+> 2026-11 之前发布的版本曾以 MIT 授权。已经拿到那些副本的人，其授权不受本次变更影响——这是 MIT 本身的规则，不是例外。
 
 ## 安全与隐私
 
