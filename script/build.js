@@ -9,6 +9,12 @@ const DATA = require('../data/michelin-guide-2026.json');
 // 反馈入口：腾讯文档收集表（填表者无需登录 GitHub）。换成自己的表单用户，只改这一行。
 const FEEDBACK_URL = 'https://docs.qq.com/form/page/DVEdqUm53VU5sRGxz';
 
+// PWA 元信息：改这里会同步到 <head> 与 manifest.webmanifest（单一数据源）
+const APP_NAME = '全国米其林指南 2026 · 打卡清单';
+const APP_SHORT_NAME = '米其林清单';
+const APP_THEME = '#26211A';
+const APP_BG = '#F8F6F1';
+
 // ---- 城市元数据 ----
 const AMAP_CITY = { "北京":"110000","上海":"310000","广州":"440100","深圳":"440300","成都":"510100","杭州":"330100","南京":"320100","苏州":"320500","天津":"120000","扬州":"321000","常州":"320400","台州":"331000","温州":"330300","福州":"350100","厦门":"350200","泉州":"350500","宁德":"350900","香港":"810000","澳门":"820000" };
 const DP_CITY = { "北京":"2","上海":"1","广州":"4","深圳":"7","成都":"8","杭州":"3","南京":"5","苏州":"6","天津":"10","扬州":"12","福州":"14","厦门":"15" };
@@ -43,10 +49,10 @@ const html = `<!DOCTYPE html>
 <meta charset="UTF-8">
 <meta name="color-scheme" content="light">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>全国米其林指南 2026 · 打卡清单</title>
+<title>${APP_NAME}</title>
 <meta name="description" content="全国米其林指南 2026 打卡清单：1137 家餐厅，星级 / 必比登 / 入选一目了然，支持「想去 / 吃过 / 值得二访」三态标记，纯本地存储，免注册、无需登录。">
-<meta name="theme-color" content="#26211A">
-<meta property="og:title" content="全国米其林指南 2026 · 打卡清单">
+<meta name="theme-color" content="${APP_THEME}">
+<meta property="og:title" content="${APP_NAME}">
 <meta property="og:description" content="1137 家米其林餐厅，按城市和评级整理成一份能打卡的清单。记录只存在你自己的浏览器里。">
 <meta property="og:type" content="website">
 <!-- 分享卡：换成自己的域名后再改这几行的绝对地址 -->
@@ -59,6 +65,19 @@ const html = `<!DOCTYPE html>
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://nonlinearhuman.github.io/michelin-checklist-2026/docs/og-card.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%2326211A'/%3E%3Ctext x='50' y='73' font-size='64' text-anchor='middle' fill='%23D8C08A'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E">
+<!-- PWA：手机「添加到主屏幕」/ 桌面 Chrome「安装应用」。
+     刻意不注册 service worker：记录只存 localStorage，缓存层只会制造页面版本错觉。
+     manifest / 图标按协议按需挂载：单文件 file:// 拷走时不发起请求，零 404、零报错。 -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="${APP_SHORT_NAME}">
+<script>
+(function(){
+  if(location.protocol!=='http:'&&location.protocol!=='https:')return;
+  var m=document.createElement('link');m.rel='manifest';m.href='manifest.webmanifest';document.head.appendChild(m);
+  var a=document.createElement('link');a.rel='apple-touch-icon';a.setAttribute('sizes','180x180');a.href='icons/apple-touch-icon.png';document.head.appendChild(a);
+})();
+</script>
 <style>
   :root{
     --bg:#F8F6F1; --card:#FFFFFF; --ink:#221D17; --sub:#8C8577;
@@ -795,6 +814,31 @@ render();
 
 const out = path.join(__dirname, '..', 'index.html');
 fs.writeFileSync(out, html);
+
+// manifest 同样是构建产物，与 <head> 共用上面的常量，避免两处名字不同步。
+// 图标是静态二进制（icons/），不在构建时生成。
+const manifest = {
+  name: APP_NAME,
+  short_name: APP_SHORT_NAME,
+  description: '1137 家米其林餐厅，一份能打卡的清单。记录只存在你自己的浏览器里。',
+  lang: 'zh-CN',
+  start_url: './',
+  scope: './',
+  display: 'standalone',
+  orientation: 'any',
+  background_color: APP_BG,
+  theme_color: APP_THEME,
+  categories: ['food', 'lifestyle', 'productivity'],
+  icons: [
+    { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+    { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+    { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
+  ]
+};
+const manifestOut = path.join(__dirname, '..', 'manifest.webmanifest');
+fs.writeFileSync(manifestOut, JSON.stringify(manifest, null, 2) + '\n');
+
 console.log('构建完成:', out, (fs.statSync(out).size / 1024).toFixed(1) + 'KB');
+console.log('PWA manifest:', manifestOut);
 console.log('总数', counts.total, '星级', counts.star, '必比登', counts.bib, '入选', counts.sel);
 console.log('城市', cities.map(c => c + ' ' + counts.byCity[c]).join(' | '));

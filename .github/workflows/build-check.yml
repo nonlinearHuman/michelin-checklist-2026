@@ -19,7 +19,7 @@ jobs:
       - name: 重新构建并校验产物一致
         run: |
           node script/build.js
-          git diff --exit-code -- index.html
+          git diff --exit-code -- index.html manifest.webmanifest
       - name: 数据基本校验
         run: |
           node -e "

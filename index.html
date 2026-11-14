@@ -20,6 +20,19 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://nonlinearhuman.github.io/michelin-checklist-2026/docs/og-card.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%2326211A'/%3E%3Ctext x='50' y='73' font-size='64' text-anchor='middle' fill='%23D8C08A'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E">
+<!-- PWA：手机「添加到主屏幕」/ 桌面 Chrome「安装应用」。
+     刻意不注册 service worker：记录只存 localStorage，缓存层只会制造页面版本错觉。
+     manifest / 图标按协议按需挂载：单文件 file:// 拷走时不发起请求，零 404、零报错。 -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="米其林清单">
+<script>
+(function(){
+  if(location.protocol!=='http:'&&location.protocol!=='https:')return;
+  var m=document.createElement('link');m.rel='manifest';m.href='manifest.webmanifest';document.head.appendChild(m);
+  var a=document.createElement('link');a.rel='apple-touch-icon';a.setAttribute('sizes','180x180');a.href='icons/apple-touch-icon.png';document.head.appendChild(a);
+})();
+</script>
 <style>
   :root{
     --bg:#F8F6F1; --card:#FFFFFF; --ink:#221D17; --sub:#8C8577;
